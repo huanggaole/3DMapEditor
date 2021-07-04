@@ -1,4 +1,4 @@
-﻿<Properties StartupConfiguration="{66EAAC51-6660-6D84-8440-B992CD116F37}|">
+﻿<Properties>
   <MonoDevelop.Ide.Workbench ActiveDocument="Assets/Scripts/Example/PlainPCG.cs">
     <Files>
       <File FileName="Assets/Scripts/Example/PlainPCG.cs" Line="1" Column="1" />
@@ -7,10 +7,12 @@
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="3DMapEditor" expanded="True">
-            <Node name="Assets" expanded="True">
-              <Node name="Scripts" expanded="True">
-                <Node name="Example" expanded="True">
-                  <Node name="PlainPCG.cs" selected="True" />
+            <Node name="Assembly-CSharp" expanded="True">
+              <Node name="Assets" expanded="True">
+                <Node name="Scripts" expanded="True">
+                  <Node name="Example" expanded="True">
+                    <Node name="PlainPCG.cs" selected="True" />
+                  </Node>
                 </Node>
               </Node>
             </Node>
