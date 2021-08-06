@@ -265,6 +265,19 @@ namespace MapPCG
                             //map[x, y].type = 3;     // 3 表示房屋
                             map[x, y].surface = 1;
                             map[x, y].typeNo = typeNo;
+
+
+                            //// +3 格
+                            //for (int tx = x - 3; tx <= x + 3; ++tx)
+                            //{
+                            //    for (int ty = y - 3; ty <= y + 3; ++ty)
+                            //    {
+                            //        if (tx >= 0 && ty >= 0 && tx < map.GetLength(0) && ty < map.GetLength(1) && map[tx, ty].surface == -1)
+                            //        {
+                            //            map[tx, ty].surface = 1;
+                            //        }
+                            //    }
+                            //}
                         }
                     }
                 }
@@ -299,11 +312,50 @@ namespace MapPCG
                     for (int y = rectangle.minP.y - 1; y <= rectangle.maxP.y + 1; ++y)
                     {
                         if (x >= 0 && y >= 0 && x < map.GetLength(0) && y < map.GetLength(1))
+                        {
                             map[x, y].height = maxHigh / 2;
-
+                            //map[x, y].surface = 1;
+                        }
                     }
                 }
             }
+            // 改成最高点高度
+            foreach (Rectangle rectangle in rectangles)
+            {
+                double maxHigh = 0;
+                for (int x = rectangle.minP.x; x <= rectangle.maxP.x; ++x)
+                {
+                    for (int y = rectangle.minP.y; y <= rectangle.maxP.y; ++y)
+                    {
+                        if (map[x, y].surface == 1)
+                        {
+                            maxHigh = Math.Max(maxHigh, map[x, y].height);
+                        }
+                    }
+                }
+                //for (int x = rectangle.minP.x; x <= rectangle.maxP.x; ++x)
+                //{
+                //    for (int y = rectangle.minP.y; y <= rectangle.maxP.y; ++y)
+                //    {
+                //        //if (map[x, y].surface == 1)
+                //        //{
+                //            map[x, y].height = maxHigh / 2;
+                //        //}
+                //    }
+                //}
+                for (int x = rectangle.minP.x - 1; x <= rectangle.maxP.x + 1; ++x)
+                {
+                    for (int y = rectangle.minP.y - 1; y <= rectangle.maxP.y + 1; ++y)
+                    {
+                        if (x >= 0 && y >= 0 && x < map.GetLength(0) && y < map.GetLength(1))
+                        {
+                            map[x, y].height = maxHigh;
+                            //map[x, y].surface = 1;
+                        }
+                    }
+                }
+            }
+
 
             List<Point> Doors = new List<Point>();
             foreach (Building building in buildings)
@@ -318,6 +370,35 @@ namespace MapPCG
                 }
             }
             GenerateRoad(map, xmin, ymin, xmax, ymax, Doors, typeNo);
+
+            for (int x = xmin; x < xmax; ++x)
+            {
+                for (int y = ymin; y < ymax; ++y)
+                {
+                    for (int i = 0; i < buildings.Count; ++i)
+                    {
+                        if (Geometry.PointInPolygon(new Point(x, y), buildings[i].points) > 0)
+                        {
+                            //map[x, y].type = 3;     // 3 表示房屋
+                            //map[x, y].surface = 1;
+                            //map[x, y].typeNo = typeNo;
+
+
+                            // +3 格
+                            for (int tx = x - 3; tx <= x + 3; ++tx)
+                            {
+                                for (int ty = y - 3; ty <= y + 3; ++ty)
+                                {
+                                    if (tx >= 0 && ty >= 0 && tx < map.GetLength(0) && ty < map.GetLength(1) && map[tx, ty].surface == -1)
+                                    {
+                                        map[tx, ty].surface = 1;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
 
             return buildings;
         }

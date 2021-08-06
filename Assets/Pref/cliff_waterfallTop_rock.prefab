@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &2564807805876445570
+--- !u!1 &240803623955014418
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,45 +8,45 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 2696052532436875791}
-  - component: {fileID: 4317583141166083660}
-  - component: {fileID: 8264985007397420549}
+  - component: {fileID: 5703940943180978002}
+  - component: {fileID: 9034119095078939206}
+  - component: {fileID: 7856841123239935024}
   m_Layer: 0
-  m_Name: loungeSofa
+  m_Name: cliff_waterfallTop_rock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &2696052532436875791
+--- !u!4 &5703940943180978002
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2564807805876445570}
+  m_GameObject: {fileID: 240803623955014418}
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.655, y: 0, z: -0.471}
-  m_LocalScale: {x: 2.0164137, y: 2.0164137, z: 2.0164137}
+  m_LocalPosition: {x: -0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
-  m_Father: {fileID: 6060921134981704820}
+  m_Father: {fileID: 4264392329264797929}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &4317583141166083660
+--- !u!33 &9034119095078939206
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2564807805876445570}
-  m_Mesh: {fileID: -7960909975771927058, guid: 687ca0e3b9ab74202bdbf28107eda326, type: 3}
---- !u!23 &8264985007397420549
+  m_GameObject: {fileID: 240803623955014418}
+  m_Mesh: {fileID: -7498024586208272092, guid: da93bb4aba6ce44f5ae5391820a3c583, type: 3}
+--- !u!23 &7856841123239935024
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2564807805876445570}
+  m_GameObject: {fileID: 240803623955014418}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -59,8 +59,11 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 7887957717227282328, guid: 687ca0e3b9ab74202bdbf28107eda326, type: 3}
-  - {fileID: -8067726398312463513, guid: 687ca0e3b9ab74202bdbf28107eda326, type: 3}
+  - {fileID: 5604539269314155553, guid: da93bb4aba6ce44f5ae5391820a3c583, type: 3}
+  - {fileID: -3963241562183589234, guid: da93bb4aba6ce44f5ae5391820a3c583, type: 3}
+  - {fileID: -6126091556477775235, guid: da93bb4aba6ce44f5ae5391820a3c583, type: 3}
+  - {fileID: -9117483709511198939, guid: da93bb4aba6ce44f5ae5391820a3c583, type: 3}
+  - {fileID: -7908462029823311255, guid: da93bb4aba6ce44f5ae5391820a3c583, type: 3}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -82,7 +85,7 @@ MeshRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!1 &6870073025141520078
+--- !u!1 &3487469009862574675
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -90,26 +93,40 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 6060921134981704820}
+  - component: {fileID: 4264392329264797929}
+  - component: {fileID: 7225392067418678692}
   m_Layer: 0
-  m_Name: loungeSofa
+  m_Name: cliff_waterfallTop_rock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &6060921134981704820
+--- !u!4 &4264392329264797929
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6870073025141520078}
+  m_GameObject: {fileID: 3487469009862574675}
   m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -88.78633, y: -40.296726, z: 159.60944}
+  m_LocalPosition: {x: 37.671867, y: 53.49028, z: -78.977615}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
-  - {fileID: 2696052532436875791}
+  - {fileID: 5703940943180978002}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &7225392067418678692
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3487469009862574675}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1, y: 1.0080442, z: 0.17528725}
+  m_Center: {x: 0, y: 0.49803567, z: -0.41235638}

@@ -1,7 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-//using UnityEngine;
+using System.IO;
 
 namespace WorldGennerator
 {
@@ -136,12 +136,14 @@ namespace WorldGennerator
             return flag;
         }
 
+        static int[] dx = new int[] { -1, 1, 0, 0 };
+        static int[] dy = new int[] { 0, 0, -1, 1 };
+
         static int[,] GrowSeed(double landScale, int seedNum, double growLandScale,
                                 List<List<Point>> seedPoints, BaseModule[,] coastLine,
                                 BaseModule[,] map, int row, int col, int type, int condition)
         {
-            int[] dx = new int[] { -1, 1, 0, 0 };
-            int[] dy = new int[] { 0, 0, -1, 1 };
+
             double growScale = landScale / seedNum * growLandScale;
             int growCnt = (int)(growScale * row * col);
             int[,] growsXY = new int[4, seedNum];
@@ -314,8 +316,6 @@ namespace WorldGennerator
                     nearestRoadPoint[i, j] = new BaseModule();
                 }
             }
-            int[] dx = new int[4] { -1, 1, 0, 0 };
-            int[] dy = new int[4] { 0, 0, -1, 1 };
             while (Q.Count != 0)
             {
                 BaseModule module = Q.Dequeue();
@@ -383,7 +383,7 @@ namespace WorldGennerator
                                 Console.Write('#');
                                 break;
                             case 1:  // 房屋
-                                Console.Write('R');
+                                Console.Write('O');
                                 break;
                             default:
                                 break;
@@ -410,11 +410,11 @@ namespace WorldGennerator
                                 break;
                             case 1:
                                 // 丘陵
-                                Console.Write('^');
+                                Console.Write('|');
                                 break;
                             case 2:
                                 // 城镇
-                                Console.Write('T');
+                                Console.Write('x');
                                 break;
                             default:
                                 break;
@@ -502,11 +502,62 @@ namespace WorldGennerator
                 for (int j = 0; j < col; ++j)
                 {
                     map[i, j].height += coastline[i, j].height;
+                    if (map[i, j].type == -1)
+                    {
+                        map[i, j].height = 0;
+                    }
                 }
             }
         }
 
         // 生成渲染数据
+        static void setType(MapSurfaceData[,] renderData, int i, int j, int type)
+        {
+            switch (type)
+            {
+                case -1: // 水域
+                    renderData[i, j].type = SurfaceTypes.WATER;
+                    break;
+                case 0: // 陆地
+                    renderData[i, j].type = SurfaceTypes.GRASS_BLOCK;
+                    break;
+                case 1: // 丘陵
+                    renderData[i, j].type = SurfaceTypes.DUST;
+                    break;
+                case 2: // 城镇
+                    renderData[i, j].type = SurfaceTypes.GRASS_BLOCK;
+                    break;
+                default:
+                    renderData[i, j].type = SurfaceTypes.ROAD;
+                    break;
+            }
+        }
+
+        static MapObjectData GennerateObjectData(int surface)
+        {
+            MapObjectData mj = new MapObjectData();
+            mj.voxel_types = new VoxelType[1, 1, 1];
+            mj.voxel_direction = new int[1, 1, 1];
+            mj.voxel_direction[0, 0, 0] = 0;
+            mj.direction = (float)(rd.NextDouble() * 360);
+            mj.scale = new float[] { 1, 1, 1 };
+            switch (surface)
+            {
+                case 2:  // 树木
+                    mj.voxel_types[0, 0, 0] = VoxelType.TREE;
+                    break;
+                case 3:  // 草
+                    mj.voxel_types[0, 0, 0] = VoxelType.GRASS;
+                    break;
+                case 4:  // 石头
+                    mj.voxel_types[0, 0, 0] = VoxelType.ROCK;
+                    break;
+                default:
+                    break;
+            }
+            return mj;
+        }
+
         static MapSurfaceData[,] RenderMap(BaseModule[,] map, int row, int col)
         {
             MapSurfaceData[,] renderData = new MapSurfaceData[row, col];
@@ -521,7 +572,6 @@ namespace WorldGennerator
                     int type = map[i, j].type;
                     if (surface != -1)
                     {
-                        MapObjectData mj = new MapObjectData();
                         switch (surface)
                         {
                             case 0:  // 道路
@@ -535,34 +585,20 @@ namespace WorldGennerator
                                 }
                                 break;
                             case 1:  // 房屋
-                                renderData[i, j].type = SurfaceTypes.GRASS_BLOCK;
+                                // renderData[i, j].type = SurfaceTypes.GRASS_BLOCK;
+                                setType(renderData, i, j, type);
                                 break;
                             case 2:  // 树木
-                                mj.voxel_types = new VoxelType[1, 1, 1];
-                                mj.voxel_types[0, 0, 0] = VoxelType.TREE;
-                                mj.voxel_direction = new int[1, 1, 1];
-                                mj.voxel_direction[0, 0, 0] = 0;
-                                mj.direction = (float)(rd.NextDouble() * 360);
-                                mj.scale = new float[] { 1, 1, 1 };
-                                renderData[i, j].mapObjectData = mj;
+                                setType(renderData, i, j, type);
+                                renderData[i, j].mapObjectData = GennerateObjectData(surface);
                                 break;
                             case 3:  // 草
-                                mj.voxel_types = new VoxelType[1, 1, 1];
-                                mj.voxel_types[0, 0, 0] = VoxelType.GRASS;
-                                mj.voxel_direction = new int[1, 1, 1];
-                                mj.voxel_direction[0, 0, 0] = 0;
-                                mj.direction = (float)(rd.NextDouble() * 360);
-                                mj.scale = new float[] { 1, 1, 1 };
-                                renderData[i, j].mapObjectData = mj;
+                                setType(renderData, i, j, type);
+                                renderData[i, j].mapObjectData = GennerateObjectData(surface);
                                 break;
                             case 4:  // 石头
-                                mj.voxel_types = new VoxelType[1, 1, 1];
-                                mj.voxel_types[0, 0, 0] = VoxelType.ROCK;
-                                mj.voxel_direction = new int[1, 1, 1];
-                                mj.voxel_direction[0, 0, 0] = 0;
-                                mj.direction = (float)(rd.NextDouble() * 360);
-                                mj.scale = new float[] { 1, 1, 1 };
-                                renderData[i, j].mapObjectData = mj;
+                                setType(renderData, i, j, type);
+                                renderData[i, j].mapObjectData = GennerateObjectData(surface);
                                 break;
                             default:
                                 renderData[i, j].type = SurfaceTypes.ROAD;
@@ -571,24 +607,7 @@ namespace WorldGennerator
                     }
                     else
                     {
-                        switch (type)
-                        {
-                            case -1: // 水域
-                                renderData[i, j].type = SurfaceTypes.WATER;
-                                break;
-                            case 0: // 陆地
-                                renderData[i, j].type = SurfaceTypes.GRASS_BLOCK;
-                                break;
-                            case 1: // 丘陵
-                                renderData[i, j].type = SurfaceTypes.DUST;
-                                break;
-                            case 2: // 城镇
-                                renderData[i, j].type = SurfaceTypes.GRASS_BLOCK;
-                                break;
-                            default:
-                                renderData[i, j].type = SurfaceTypes.ROAD;
-                                break;
-                        }
+                        setType(renderData, i, j, type);
                     }
                 }
             }
@@ -601,27 +620,19 @@ namespace WorldGennerator
             return i >= 0 && i < row && j >= 0 && j < col;
         }
 
-        static void ReWriteType(BaseModule[,] map, int row, int col)
+        static double GetDouble(double min, double max)
         {
-            for (int i = 0; i < row; ++i)
+            double num = rd.NextDouble();
+            while (num < min || num > max)
             {
-                for (int j = 0; j < col; ++j)
-                {
-                    if (map[i, j].islandCnt >= 0 && map[i, j].type < 0)
-                    {
-                        map[i, j].type = 0;
-                    }
-                }
+                num = rd.NextDouble();
             }
-
+            return num;
         }
 
         // 生成河流
         static BaseModule[,] GenerateRiver(BaseModule[,] map, int row, int col, int hillNum, int islandnNum)
         {
-
-            //ReWriteType(map, row, col);
-
             int[,] dir = { { -1, -1 }, { -1, 1 }, { 1, 1 }, { 1, -1 }, { 0, 1 }, { 0, -1 }, { 1, 0 }, { -1, 0 } };
             //丘陵和岛屿是否邻接
             bool[,] hill2Island = new bool[hillNum, islandnNum];
@@ -731,10 +742,59 @@ namespace WorldGennerator
             return map;
         }
 
+        // 增加河流宽度
+        static void IncreaseRiverWidth(BaseModule[,] map, int row, int col)
+        {
+            bool[,] needChange = new bool[row, col];
+            for (int i = 0; i < row; ++i)
+            {
+                for (int j = 0; j < col; ++j)
+                {
+                    needChange[i, j] = false;
+                }
+            }
+            for (int i = 0; i < row; ++i)
+            {
+                for (int j = 0; j < col; ++j)
+                {
+                    if (map[i, j].type != -1)
+                    {
+                        continue;
+                    }
+                    for (int t = 0; t < 4; ++t)
+                    {
+                        int x = map[i, j].x + dx[t];
+                        int y = map[i, j].y + dy[t];
+                        if (InMap(x, y, row, col) && map[x, y].type != -1)
+                        {
+                            needChange[x, y] = true;
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < row; ++i)
+            {
+                for (int j = 0; j < col; ++j)
+                {
+                    if (needChange[i, j])
+                    {
+                        map[i, j].type = -1;
+                    }
+                }
+            }
+        }
+
         static Random rd = new Random();
 
         // 生成地图
-        static public MapSurfaceData[,] GennerateMap(int row, int col, double mapSize, int islandnNum, bool inUnity)
+        static public MapSurfaceData[,] GennerateMap(bool inUnity, int row,
+            int col, double mapSize, double landScale, int landWave,
+            double landHeight, int islandNum, double islandBalance, int hillNum,
+            double hillScale, double hillBalance, int hillWave,
+            double hillHeight, int riverWidth, int townNum, double townScale,
+            double townBalance, int roomNum, double treeCover,
+            double grassCover, double rockCover,
+            bool hillGrowTree)
         {
             int rowAdd = 0;
             int colAdd = 0;
@@ -753,7 +813,6 @@ namespace WorldGennerator
 
             // 生成蒙板地图，确定海岸线和地形高度
             Console.WriteLine(">>>>>>>>>>Gennerate coastline<<<<<<<<<<");
-            double landScale = 0.7;
             Point root = new Point(row / 2, col / 2);
             List<List<Point>> terrianPoints = new List<List<Point>>();
             terrianPoints.Add(new List<Point>());
@@ -769,7 +828,7 @@ namespace WorldGennerator
             coastLine[row / 2, col / 2].islandCnt = 0;
             coastLine[row / 2, col / 2].type = 0;
 
-            int[,] coastXY = GrowSeed(landScale, 1, 1.0, terrianPoints, coastLine, coastLine, row, col, 0, -1);
+            int[,] coastXY = GrowSeed((landScale + 0.02 * riverWidth), 1, 1.0, terrianPoints, coastLine, coastLine, row, col, 0, -1);
 
             if (!inUnity)
             {
@@ -778,16 +837,15 @@ namespace WorldGennerator
 
             // 蒙板地图生成高度图
             Console.WriteLine(">>>>>>>>>>Gennerate coastline heightmap<<<<<<<<<<");
-            int mapHeightScale = (int)(row / 5.0);
-            MapPCG.HillsPCG.GenerateHillsMap(coastLine, coastXY[0, 0], coastXY[1, 0], coastXY[2, 0], coastXY[3, 0], mapHeightScale, 0.2, 0);
+            MapPCG.HillsPCG.GenerateHillsMap(coastLine, coastXY[0, 0], coastXY[1, 0], coastXY[2, 0], coastXY[3, 0], (int)(row / landWave), landHeight, 0);
             if (!inUnity)
             {
-                PrintHeightMap(coastLine, row, col, 1);
+                PrintHeightMap(coastLine, row, col, 5);
             }
 
             // 生成岛屿种子，种子必须落在海岸线中的陆地区域
             Console.WriteLine(">>>>>>>>>>Choose island seeds<<<<<<<<<<");
-            List<List<Point>> islandPoints = GennerateSeeds(coastLine, map, islandnNum, row, col, 0, 0);
+            List<List<Point>> islandPoints = GennerateSeeds(coastLine, map, islandNum, row, col, 0, 0);
             if (!inUnity)
             {
                 PrintMap(map, row, col, true);
@@ -795,7 +853,7 @@ namespace WorldGennerator
 
             // 岛屿种子成长为岛屿
             Console.WriteLine(">>>>>>>>>>Grow island seeds<<<<<<<<<<");
-            GrowSeed(landScale, islandnNum, 1.0, islandPoints, coastLine, map, row, col, 0, 0);
+            GrowSeed(landScale, islandNum, 1.0, islandPoints, coastLine, map, row, col, 0, 0);
             if (!inUnity)
             {
                 PrintMap(map, row, col, true);
@@ -803,12 +861,11 @@ namespace WorldGennerator
 
             // 生成丘陵种子
             Console.WriteLine(">>>>>>>>>>Choose hill seeds<<<<<<<<<<");
-            int hillNum = islandnNum;
             List<List<Point>> hillPoints = GennerateSeeds(coastLine, map, hillNum, row, col, 1, 1);
 
             // 丘陵种子成长为丘陵
             Console.WriteLine(">>>>>>>>>>Grow hill seeds<<<<<<<<<<");
-            int[,] hillsXY = GrowSeed(landScale, hillNum, 0.4, hillPoints, coastLine, map, row, col, 1, 1);
+            int[,] hillsXY = GrowSeed(landScale, hillNum, hillScale, hillPoints, coastLine, map, row, col, 1, 1);
             if (!inUnity)
             {
                 PrintMap(map, row, col, false);
@@ -818,7 +875,14 @@ namespace WorldGennerator
             Console.WriteLine(">>>>>>>>>>Gennerate exact hills<<<<<<<<<<");
             for (int i = 0; i < hillNum; ++i)
             {
-                MapPCG.HillsPCG.GenerateHillsMap(map, hillsXY[0, i], hillsXY[1, i], hillsXY[2, i], hillsXY[3, i], row / 10, 1.0, 1);
+                double changeScale = GetDouble(hillBalance, 1.0);
+                if (i == 0)
+                {
+                    changeScale = 1.0;
+                }
+                MapPCG.HillsPCG.GenerateHillsMap(map, hillsXY[0, i],
+                    hillsXY[1, i], hillsXY[2, i], hillsXY[3, i],
+                    (int)(row / hillWave), hillHeight * changeScale, 1);
             }
             if (!inUnity)
             {
@@ -827,10 +891,16 @@ namespace WorldGennerator
 
             // 生成河流
             Console.WriteLine(">>>>>>>>>>Produce rivers<<<<<<<<<<");
-            GenerateRiver(map, row, col, hillNum, islandnNum);
+            GenerateRiver(map, row, col, hillNum, islandNum);
             if (!inUnity)
             {
                 PrintMap(map, row, col, false);
+            }
+
+            // 调整河流宽度
+            for (int i = 0; i < riverWidth; ++i)
+            {
+                IncreaseRiverWidth(map, row, col);
             }
 
             // 合并高度
@@ -840,27 +910,26 @@ namespace WorldGennerator
             MergeHeight(coastLine, map, row, col);
             if (!inUnity)
             {
-                PrintHeightMap(map, row, col, 0.9);
+                PrintHeightMap(map, row, col, 1.0 / (landHeight + 1.0));
             }
 
             // 生成城镇种子
             Console.WriteLine(">>>>>>>>>>Produce town seeds<<<<<<<<<<");
-            int townNum = islandnNum;
             List<List<Point>> townPoints = GennerateSeeds(coastLine, map, townNum, row, col, 2, 2);
 
             // 城镇种子成长为城镇
             Console.WriteLine(">>>>>>>>>>Grow town seeds<<<<<<<<<<");
-            int[,] townsXY = GrowSeed(landScale, townNum, 0.3, townPoints, coastLine, map, row, col, 2, 2);
+            int[,] townsXY = GrowSeed(landScale, townNum, townScale, townPoints, coastLine, map, row, col, 2, 2);
             if (!inUnity)
             {
                 PrintMap(map, row, col, false);
             }
 
             // 生成城镇排布
-            Console.WriteLine(">>>>>>>>>>Gennerate exact towns<<<<<<<<<<");
+            Console.WriteLine(">>>>>>>>>>Gennerate rooms and roads<<<<<<<<<<");
             for (int i = 0; i < townNum; ++i)
             {
-                List<MapPCG.Building> buildings = MapPCG.TownPCG.GenerateTownMap(map, townsXY[0, i], townsXY[1, i], townsXY[2, i], townsXY[3, i], 4, i);
+                List<MapPCG.Building> buildings = MapPCG.TownPCG.GenerateTownMap(map, townsXY[0, i], townsXY[1, i], townsXY[2, i], townsXY[3, i], roomNum, i);
             }
             if (!inUnity)
             {
@@ -868,6 +937,7 @@ namespace WorldGennerator
             }
 
             // 道路连接
+            Console.WriteLine(">>>>>>>>>>Link towns<<<<<<<<<<");
             LinkTown(map, row, col, townNum);
             if (!inUnity)
             {
@@ -888,34 +958,35 @@ namespace WorldGennerator
                     if (module.type != -1)
                     {
                         double rand = rd.NextDouble();
-                        if (rand <= 0.05)
+                        if (rand <= treeCover)
                         {
-                            if (module.type != 1)
+                            if (module.type == 1 && !hillGrowTree)
                             {
-                                module.surface = 2; // 树木
+                                continue;
                             }
+                            module.surface = 2;
                         }
-                        if (rand >= 0.2 && rand <= 0.25)
+                        else if (rand <= (treeCover + grassCover))
                         {
-                            module.surface = 4; // 石头
+                            module.surface = 3;
                         }
-                        if (rand >= 0.4 && rand <= 0.8)
+                        else if (rand <= (treeCover + grassCover + rockCover))
                         {
-                            module.surface = 3; // 草
+                            module.surface = 4;
                         }
                     }
                 }
             }
 
-            // 转换渲染数据
+            // 转换渲染数据并返回
             MapSurfaceData[,] renderData = RenderMap(map, row, col);
-
             return renderData;
         }
 
         static void Main()
         {
-            MapSurfaceData[,] renderMap = GennerateMap(200, 200, 0.1, 3, false);
+            MapSurfaceData[,] renderMap = GennerateMap(false, 200, 200, 0, 0.7,
+                5, 0.2, 3, 1.0, 3, 0.4, 0.8, 10, 1.0, 1, 3, 0.3, 1.0, 4, 0.05, 0.4, 0.05, false);
         }
     }
 }

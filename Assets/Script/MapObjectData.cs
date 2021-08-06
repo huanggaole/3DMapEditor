@@ -10,6 +10,7 @@ public class MapObjectData
     public int[,,] fur_direction;
     public float direction = 0; // 物体方向，任意角度，单位：度
     public float[] scale = { 1, 1, 1 }; // 物体缩放，本地空间（x，y，z）三个方向
+    public int[] staircase;
 }
 
 public class BaseModule

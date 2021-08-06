@@ -244,7 +244,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
 --- !u!1 &940223135
 GameObject:
@@ -264,7 +264,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!64 &940223136
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -340,7 +340,7 @@ Transform:
   m_LocalScale: {x: 9.6477, y: 9.6477, z: 9.6477}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &963194225
 GameObject:
@@ -445,7 +445,7 @@ Rigidbody:
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 112
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
 --- !u!114 &963194230
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -550,8 +550,8 @@ MonoBehaviour:
   dust_block_hill_corner_out: {fileID: 6767551415109539458, guid: 52f4c3bf4fc469049b92478649a1846b, type: 3}
   dust_block_hill_corner_inner: {fileID: 6295866624393209915, guid: c0d0209b740b5f84b834fddedb71d663, type: 3}
   road_block_top: {fileID: 5154858369599450474, guid: 74b15214a9e3a894fa0068e8185646a8, type: 3}
-  road_block_cliff: {fileID: 3143094695464648793, guid: 698276c19324fd04c923fdd03285d1a2, type: 3}
-  road_block_cliff_top: {fileID: 3143094695464648793, guid: 698276c19324fd04c923fdd03285d1a2, type: 3}
+  road_block_cliff: {fileID: 1413828169606488499, guid: 53b69a40cf3de144cb8cd30270f76bfc, type: 3}
+  road_block_cliff_top: {fileID: 1503035239272563739, guid: 2cc07916ad136134195679ea3b6d4108, type: 3}
   road_block_hill: {fileID: 1932595381780217160, guid: 22b461b63146ddc4ab5328c84b3b73f6, type: 3}
   road_block_hill_corner_out: {fileID: 1951493257259667701, guid: 511cdf8c58e41a04792326cfd93bb689, type: 3}
   road_block_hill_corner_inner: {fileID: 6300626024318682036, guid: f4e3eff2ccaac6c47908e7876ec0d3de, type: 3}
@@ -562,11 +562,11 @@ MonoBehaviour:
   road_top_single: {fileID: 5596368873255464819, guid: 560e29b1ce757144a8f07798a2a9b300, type: 3}
   road_top_straight: {fileID: 1760379618543785171, guid: d80421a5c1721e2418e51b039ac52e09, type: 3}
   water_block_top: {fileID: 2283329527791074607, guid: e46d0885d37e6ce41b3e2c5bb18c1eba, type: 3}
-  water_block_cliff: {fileID: 1413828169606488499, guid: 53b69a40cf3de144cb8cd30270f76bfc, type: 3}
-  water_block_cliff_top: {fileID: 1503035239272563739, guid: 2cc07916ad136134195679ea3b6d4108, type: 3}
-  water_block_hill: {fileID: 4845046970560477150, guid: 6b498ec3f282822409be77e0ba920513, type: 3}
-  water_block_hill_corner_out: {fileID: 6767551415109539458, guid: 52f4c3bf4fc469049b92478649a1846b, type: 3}
-  water_block_hill_corner_inner: {fileID: 6295866624393209915, guid: c0d0209b740b5f84b834fddedb71d663, type: 3}
+  water_block_cliff: {fileID: 833510657807398598, guid: 97f854865d511af4a90508af148dfcfb, type: 3}
+  water_block_cliff_top: {fileID: 3487469009862574675, guid: e2a13730f362bb2408fa6f51d5f20f27, type: 3}
+  water_block_hill: {fileID: 1986976980539861830, guid: 0042432a5236a5c4e9db649899d49749, type: 3}
+  water_block_hill_corner_out: {fileID: 1092917988772297835, guid: b76199632709b9b479ae13e1a67650c6, type: 3}
+  water_block_hill_corner_inner: {fileID: 9174482360432361850, guid: 37980696adb19f5468827ade18a668f2, type: 3}
   water_top_corner_inner: {fileID: 5377484299121569922, guid: fd62d76caa54325458584d69d7c0ec8a, type: 3}
   water_top_corner_out: {fileID: 8747459375662567329, guid: 16d9b72f173cfd14bbfce8b3de24a3e3, type: 3}
   water_top_side: {fileID: 6000304653066361754, guid: 542bf61ddbb657e4b903edff6053ae52, type: 3}
@@ -611,6 +611,28 @@ MonoBehaviour:
   washer: {fileID: 6608538055346642059, guid: 990af387c93304c4e955544cb97c049a, type: 3}
   frozer: {fileID: 7779476957973644509, guid: a7a77f4c9adc10645ba054dad14e7be7, type: 3}
   cooker: {fileID: 5949052889459399635, guid: f0e617e0d739c25438a70d83e653fd9c, type: 3}
+  stair: {fileID: 347554503639051188, guid: 91fdf9eaef1b88b4ca973d6ce87bad8e, type: 3}
+  inUnity: 1
+  mapSize: 0
+  landScale: 0.7
+  landWave: 5
+  landHeight: 0.2
+  islandNum: 3
+  islandBalance: 1
+  hillNum: 3
+  hillScale: 0.4
+  hillBalance: 0.8
+  hillWave: 10
+  hillHeight: 1
+  riverWidth: 1
+  townNum: 3
+  townScale: 0.3
+  townBalance: 1
+  roomNum: 4
+  treeCover: 0.05
+  grassCover: 0.4
+  rockCover: 0.05
+  hillGrowTree: 0
   colors:
   - {r: 0, g: 0, b: 0, a: 1}
   - {r: 1, g: 0, b: 0, a: 1}
@@ -632,62 +654,5 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &7124726996654464947
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    m_TransformParent: {fileID: 0}
-    m_Modifications:
-    - target: {fileID: 1485759311973357610, guid: 8f131f66cac47834c8cbaebbd8888297, type: 3}
-      propertyPath: m_RootOrder
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1485759311973357610, guid: 8f131f66cac47834c8cbaebbd8888297, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 89.62191
-      objectReference: {fileID: 0}
-    - target: {fileID: 1485759311973357610, guid: 8f131f66cac47834c8cbaebbd8888297, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 32.44
-      objectReference: {fileID: 0}
-    - target: {fileID: 1485759311973357610, guid: 8f131f66cac47834c8cbaebbd8888297, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 45.345863
-      objectReference: {fileID: 0}
-    - target: {fileID: 1485759311973357610, guid: 8f131f66cac47834c8cbaebbd8888297, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1485759311973357610, guid: 8f131f66cac47834c8cbaebbd8888297, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1485759311973357610, guid: 8f131f66cac47834c8cbaebbd8888297, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1485759311973357610, guid: 8f131f66cac47834c8cbaebbd8888297, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1485759311973357610, guid: 8f131f66cac47834c8cbaebbd8888297, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1485759311973357610, guid: 8f131f66cac47834c8cbaebbd8888297, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1485759311973357610, guid: 8f131f66cac47834c8cbaebbd8888297, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2293927139748528784, guid: 8f131f66cac47834c8cbaebbd8888297, type: 3}
-      propertyPath: m_Name
-      value: cabinetBedDrawer
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 8f131f66cac47834c8cbaebbd8888297, type: 3}

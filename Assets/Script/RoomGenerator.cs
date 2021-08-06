@@ -79,11 +79,17 @@ namespace RoomGenerator
             }
 
         }
-
+        static Random rd = new Random();
         static public MapObjectData ConvertToMapData(OuterSkeleton skel)
         {
-            MapObjectData obj = skel.ConvertInit(1);
-            return skel.Convert(0, obj);
+            int he = rd.Next(6) + 1;
+            MapObjectData obj = skel.ConvertInit(he);
+            obj = skel.Convert(0, obj);
+            for (int i = 1; i < he; i++)
+            {
+                obj = skel.Convert(i, obj);
+            }
+            return obj;
         }
 
         static OuterSkeleton ConverToSkel(MapPCG.Building build, int scale = 2)
@@ -118,8 +124,8 @@ namespace RoomGenerator
             r = new Requirement(4, 4, true, RoomType.personal, RoomName.bedroom, -1);
             req.Add(r);
             // r = new Requirement(4, 4, true, RoomType.personal, RoomName.bedroom, -1);
-            // r.Add(4);
-            // req.Add(r);
+            //r.Add(4);
+            //req.Add(r);
             /*r = new Requirement(5, 5, true, RoomType.personal, -1);
             r.Add(3);
             req.Add(r);*/
@@ -151,9 +157,9 @@ namespace RoomGenerator
                 skel.Mergecell();
                 if (skel.Fulfill(req)) break;
                 failN++;
-                if (failN > 10000) break;
+                if (failN > 1000) break;
             }
-            if (failN > 10000)
+            if (failN > 1000)
             {
                 req = ReqSampleEasy();
                 failN = 0;

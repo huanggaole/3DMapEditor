@@ -86,9 +86,30 @@ public class MapGenerator : MonoBehaviour
     public GameObject washer;
     public GameObject frozer;
     public GameObject cooker;
+    public GameObject stair;
 
 
-
+    public bool inUnity = true;  // 不暴露给用户
+    public double mapSize = 0;  // 不暴露给用户
+    public double landScale = 0.7;  // 陆地占总地图的比例
+    public int landWave = 5;  // 陆地起伏程度，越大起伏越大
+    public double landHeight = 0.2;  // 陆地最大高度
+    public int islandNum = 3;  // 岛屿数量
+    public double islandBalance = 1.0;  // 陆地均匀程度，越大越均匀，取值范围0.0--1.0
+    public int hillNum = 3;  // 丘陵数量
+    public double hillScale = 0.4;  // 丘陵占陆地的比例
+    public double hillBalance = 0.8;  // 丘陵均匀程度，越大越均匀，取值范围0.0--1.0
+    public int hillWave = 10;  // 丘陵起伏程度，越大起伏越大
+    public double hillHeight = 1.0;  // 丘陵最大高度
+    public int riverWidth = 1;  // 河流宽度，越大越宽
+    public int townNum = 3;  // 城镇数量
+    public double townScale = 0.3;  // 城镇占陆地的比例
+    public double townBalance = 1.0;  // 城镇均匀程度，越大越均匀，取值范围0.0--1.0
+    public int roomNum = 4;  // 每个城镇的房屋数量
+    public double treeCover = 0.05;  // 树木覆盖率
+    public double grassCover = 0.4;  // 草覆盖率
+    public double rockCover = 0.05;  // 石头覆盖率
+    public bool hillGrowTree = false;  // 丘陵上是否长草
 
 
 
@@ -362,7 +383,7 @@ public class MapGenerator : MonoBehaviour
 
     }
 
-    private void RenderMapObject(MapObjectData mobj, Vector3 pos, Transform root)
+    private void RenderMapObject(MapObjectData mobj, Vector3 pos, Transform root, bool onhill)
     {
         GameObject pa = new GameObject("ROOT");
         pa.transform.parent = root;
@@ -371,6 +392,17 @@ public class MapGenerator : MonoBehaviour
         pa.transform.position = pos;
 
         bool topCover = false;
+
+        if (mobj.staircase != null)
+        {
+            for (int z = 0; z < mobj.voxel_types.GetLength(2) - 1; z++)
+            {
+                position = new Vector3(mobj.staircase[0], pos.y + z * room_height, mobj.staircase[1]);
+                Transform lparent = areaLeader[(int)((mobj.staircase[0]) / viewBlockSize),
+                    (int)((mobj.staircase[1]) / viewBlockSize)].visuableKey.transform;
+                Instantiate(stair, position, rotation, lparent);
+            }
+        }
         
         for (int x = 0; x < mobj.voxel_types.GetLength(0); x++)
         {
@@ -379,7 +411,7 @@ public class MapGenerator : MonoBehaviour
                 for (int z = 0; z < mobj.voxel_types.GetLength(2); z++)
                 {
                     Transform lparent = areaLeader[(int)((pos.x + x) / viewBlockSize), (int)((pos.z + y) / viewBlockSize)].visuableKey.transform;
-                    position = pos + new Vector3(x, z, y);
+                    position = pos + new Vector3(x, z * room_height, y);
                     VoxelType type = mobj.voxel_types[x, y, z];
                     int dir = mobj.voxel_direction[x, y, z];
                     if (z == mobj.voxel_types.GetLength(2) - 1) 
@@ -423,27 +455,60 @@ public class MapGenerator : MonoBehaviour
                             walllike.transform.localScale = new Vector3(walllike.transform.localScale.x,
                                 walllike.transform.localScale.y * room_height, walllike.transform.localScale.z);
                         }
+                        if (Mathf.Abs(dir) > 128 && z == 0)
+                        {
+                            rotation.eulerAngles = new Vector3(0, 0, 0);
+                            walllike = Instantiate(door, position, rotation, lparent);
+                            walllike.transform.localScale = new Vector3(walllike.transform.localScale.x,
+                                walllike.transform.localScale.y * room_height, walllike.transform.localScale.z);
+
+                            rotation.eulerAngles = new Vector3(0, 270, 0);
+                            walllike = Instantiate(wall, position, rotation, lparent);
+                            walllike.transform.localScale = new Vector3(walllike.transform.localScale.x,
+                                walllike.transform.localScale.y * room_height, walllike.transform.localScale.z);
+                        }
+                        if (Mathf.Abs(dir) > 128 && z > 0)
+                        {
+                            rotation.eulerAngles = new Vector3(0, 0, 0);
+                            walllike = Instantiate(windows[Random.Range(0, windows.Length)], position, rotation, lparent);
+                            walllike.transform.localScale = new Vector3(walllike.transform.localScale.x,
+                                walllike.transform.localScale.y * room_height, walllike.transform.localScale.z);
+
+                            rotation.eulerAngles = new Vector3(0, 270, 0);
+                            walllike = Instantiate(wall, position, rotation, lparent);
+                            walllike.transform.localScale = new Vector3(walllike.transform.localScale.x,
+                                walllike.transform.localScale.y * room_height, walllike.transform.localScale.z);
+                        }
                     }
                     if (type == VoxelType.FLOOR)
                     {
                         rotation.eulerAngles = new Vector3();
-                        Instantiate(floor, position, rotation, lparent);
+                        if (((x - 1 != Mathf.RoundToInt(mobj.staircase[0] - pos.x) ||
+                            y - 1 != Mathf.RoundToInt(mobj.staircase[1] - pos.z)) &&
+                            (x - 1 != Mathf.RoundToInt(mobj.staircase[0] - pos.x) ||
+                            y != Mathf.RoundToInt(mobj.staircase[1] - pos.z)) &&
+                            (x - 1 != Mathf.RoundToInt(mobj.staircase[0] - pos.x) ||
+                            y - 2 != Mathf.RoundToInt(mobj.staircase[1] - pos.z))) ||
+                            z == 0)
+                            Instantiate(floor, position, rotation, lparent);
                         if (topCover)
                             Instantiate(floor, position + new Vector3(0, room_height, 0), rotation, lparent);
 
                     }
 
+                    Vector3 hillFix = new Vector3(0, onhill ? 0.33f : 0, 0);
+
                     if (type == VoxelType.GRASS)
                     {
                         rotation.eulerAngles = new Vector3();
-                        GameObject plt = Instantiate(grass[Random.Range(0, grass.Length)], position, rotation, lparent);
+                        GameObject plt = Instantiate(grass[Random.Range(0, grass.Length)], position + hillFix, rotation, lparent);
                         plt.transform.localScale = plt.transform.localScale * planetScale;
                     }
 
                     if (type == VoxelType.TREE)
                     {
                         rotation.eulerAngles = new Vector3();
-                        GameObject plt = Instantiate(tree[Random.Range(0, tree.Length)], position, rotation, lparent);
+                        GameObject plt = Instantiate(tree[Random.Range(0, tree.Length)], position + hillFix, rotation, lparent);
                         plt.transform.localScale = plt.transform.localScale * planetScale;
 
                     }
@@ -451,7 +516,7 @@ public class MapGenerator : MonoBehaviour
                     if (type == VoxelType.ROCK)
                     {
                         rotation.eulerAngles = new Vector3();
-                        GameObject plt = Instantiate(rock[Random.Range(0, rock.Length)], position, rotation, lparent);
+                        GameObject plt = Instantiate(rock[Random.Range(0, rock.Length)], position + hillFix, rotation, lparent);
                         plt.transform.localScale = plt.transform.localScale * rockScale;
                     }
 
@@ -465,11 +530,21 @@ public class MapGenerator : MonoBehaviour
             {
                 for (int z = 0; z < mobj.fur_types.GetLength(2); z++)
                 {
+
                     Transform lparent = areaLeader[(int)((pos.x + x) / viewBlockSize), (int)((pos.z + y) / viewBlockSize)].visuableKey.transform;
-                    position = pos + new Vector3(x, z, y);
+                    position = pos + new Vector3(x, z * room_height, y);
+
                     FurType type = mobj.fur_types[x, y, z];
                     int dir = mobj.fur_direction[x, y, z];
                     int offset = 1;
+
+                    if (mobj.staircase != null &&
+                        Vector2.Distance(new Vector2(position.x, position.z),
+                        new Vector2(mobj.staircase[0], mobj.staircase[1])) < 5)
+                    {
+                        continue;
+                    }
+
                     if (type == FurType.Sofa)
                     {
                         rotation.eulerAngles = new Vector3(0, (dir + offset) * 90, 0);
@@ -538,6 +613,62 @@ public class MapGenerator : MonoBehaviour
         }
     }
 
+    void GetNiceNeighbor(int x, int y,
+        out GameObject cliffVoxel,
+        out GameObject hillVoxel,
+        out GameObject cornerIVoxel,
+        out GameObject cornerOVoxel,
+        out GameObject cliffTop)
+    {
+        if (x < 0 || y < 0 || x >= row || y >= col)
+        {
+            cliffVoxel = dust_block_cliff;
+            hillVoxel = dust_block_hill;
+            cornerIVoxel = dust_block_hill_corner_inner;
+            cornerOVoxel = dust_block_hill_corner_out;
+            cliffTop = dust_block_cliff_top;
+            return;
+        }
+        switch (surface[x, y].type)
+        {
+            case SurfaceTypes.GRASS_BLOCK:
+                cliffVoxel = grass_block_cliff;
+                hillVoxel = grass_block_hill;
+                cornerIVoxel = grass_block_hill_corner_inner;
+                cornerOVoxel = grass_block_hill_corner_out;
+                cliffTop = grass_block_cliff_top;
+                break;
+            case SurfaceTypes.ROAD:
+                cliffVoxel = road_block_cliff;
+                hillVoxel = road_block_hill;
+                cornerIVoxel = road_block_hill_corner_inner;
+                cornerOVoxel = road_block_hill_corner_out;
+                cliffTop = road_block_cliff_top;
+                break;
+            case SurfaceTypes.BRIDGE:
+                cliffVoxel = road_block_cliff;
+                hillVoxel = road_block_hill;
+                cornerIVoxel = road_block_hill_corner_inner;
+                cornerOVoxel = road_block_hill_corner_out;
+                cliffTop = road_block_cliff_top;
+                break;
+            case SurfaceTypes.WATER:
+                cliffVoxel = water_block_cliff;
+                hillVoxel = water_block_hill;
+                cornerIVoxel = water_block_hill_corner_inner;
+                cornerOVoxel = water_block_hill_corner_out;
+                cliffTop = water_block_cliff_top;
+                break;
+            default:
+                cliffVoxel = dust_block_cliff;
+                hillVoxel = dust_block_hill;
+                cornerIVoxel = dust_block_hill_corner_inner;
+                cornerOVoxel = dust_block_hill_corner_out;
+                cliffTop = dust_block_cliff_top;
+                break;
+        }
+    }
+
     public void gennerator()
     {
         int childCount = gameObject.transform.childCount;
@@ -546,7 +677,13 @@ public class MapGenerator : MonoBehaviour
             DestroyImmediate(gameObject.transform.GetChild(i).gameObject);
         }
         // surface = MapFromImage.fromImage(debugImage, row, col);
-        surface = WorldGennerator.Util.GennerateMap(row, col, 0.1, 3, true);
+        // surface = WorldGennerator.Util.GennerateMap(true, row, col, 0, 0.7,
+        // 5, 0.2, 3, 1.0, 3, 0.4, 0.8, 10, 1.0, 1, 3, 0.3, 1.0, 4, 0.05, 0.4, 0.05, false);
+
+        surface = WorldGennerator.Util.GennerateMap(true, row, col, 0, landScale,
+            landWave, landHeight, islandNum, islandBalance, hillNum, hillScale, hillBalance, hillWave,
+            hillHeight, riverWidth, townNum, townScale, townBalance, roomNum, treeCover, grassCover,
+            rockCover, hillGrowTree);
 
         HeightMapDisplay.colors = colors;
         HeightMapDisplay.color_powers = color_powers;
@@ -609,43 +746,18 @@ public class MapGenerator : MonoBehaviour
                 {
                     case SurfaceTypes.GRASS_BLOCK:
                         faceVoxel = grass_block_top;
-                        cliffVoxel = grass_block_cliff;
-                        hillVoxel = grass_block_hill;
-                        cornerIVoxel = grass_block_hill_corner_inner;
-                        cornerOVoxel = grass_block_hill_corner_out;
-                        cliffTop = grass_block_cliff_top;
                         break;
                     case SurfaceTypes.ROAD:
                         faceVoxel = road_block_top;
-                        cliffVoxel = road_block_cliff;
-                        hillVoxel = road_block_hill;
-                        cornerIVoxel = road_block_hill_corner_inner;
-                        cornerOVoxel = road_block_hill_corner_out;
-                        cliffTop = road_block_cliff_top;
                         break;
                     case SurfaceTypes.BRIDGE:
                         faceVoxel = road_block_top;
-                        cliffVoxel = road_block_cliff;
-                        hillVoxel = road_block_hill;
-                        cornerIVoxel = road_block_hill_corner_inner;
-                        cornerOVoxel = road_block_hill_corner_out;
-                        cliffTop = road_block_cliff_top;
                         break;
                     case SurfaceTypes.WATER:
                         faceVoxel = water_block_top;
-                        cliffVoxel = water_block_cliff;
-                        hillVoxel = water_block_hill;
-                        cornerIVoxel = water_block_hill_corner_inner;
-                        cornerOVoxel = water_block_hill_corner_out;
-                        cliffTop = water_block_cliff_top;
                         break;
                     default:
                         faceVoxel = dust_block_top;
-                        cliffVoxel = dust_block_cliff;
-                        hillVoxel = dust_block_hill;
-                        cornerIVoxel = dust_block_hill_corner_inner;
-                        cornerOVoxel = dust_block_hill_corner_out;
-                        cliffTop = dust_block_cliff_top;
                         break;
                 }
                 
@@ -654,6 +766,7 @@ public class MapGenerator : MonoBehaviour
 
                 int[] dx = { -1, 0, 1, 0, -1, 1, 1, -1 };
                 int[] dy = { 0, -1, 0, 1, -1, 1, -1, 1 };
+                bool onhill = false;
 
                 for (int i = 7; i >= 0; i--)
                 {
@@ -679,53 +792,69 @@ public class MapGenerator : MonoBehaviour
                 {
                     // 北面山坡
                     rotation.eulerAngles = new Vector3(0, 180 + rotationOffset, 0);
+                    GetNiceNeighbor(x + dx[0], y + dy[0], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                     Instantiate(hillVoxel, position, rotation, parent);
+                    onhill = true;
                 }
                 if ((neighborStatus & 4) > 0 && (neighborStatus & 2) == 0 && (neighborStatus & 8) == 0)
                 {
                     // 南面山坡
                     rotation.eulerAngles = new Vector3(0, 0 + rotationOffset, 0);
+                    GetNiceNeighbor(x + dx[2], y + dy[2], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                     Instantiate(hillVoxel, position, rotation, parent);
+                    onhill = true;
                 }
                 if ((neighborStatus & 8) > 0 && (neighborStatus & 1) == 0 && (neighborStatus & 4) == 0)
                 {
                     // 东面山坡
                     rotation.eulerAngles = new Vector3(0, 270 + rotationOffset, 0);
+                    GetNiceNeighbor(x + dx[3], y + dy[3], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                     Instantiate(hillVoxel, position, rotation, parent);
+                    onhill = true;
                 }
                 if ((neighborStatus & 2) > 0 && (neighborStatus & 1) == 0 && (neighborStatus & 4) == 0)
                 {
                     // 西面山坡
                     rotation.eulerAngles = new Vector3(0, 90 + rotationOffset, 0);
+                    GetNiceNeighbor(x + dx[1], y + dy[1], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                     Instantiate(hillVoxel, position, rotation, parent);
+                    onhill = true;
                 }
                 if ((neighborStatus & 1) == 1 && (neighborStatus & 8) == 8 &&
                     (neighborStatus & 2) == 0 && (neighborStatus & 4) == 0)
                 {
                     // 西北内拐角
                     rotation.eulerAngles = new Vector3(0, 180 + rotationOffset, 0);
+                    GetNiceNeighbor(x + dx[7], y + dy[7], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                     Instantiate(cornerIVoxel, position, rotation, parent);
+                    onhill = true;
                 }
                 if ((neighborStatus & 1) == 0 && (neighborStatus & 8) == 8 &&
                     (neighborStatus & 2) == 0 && (neighborStatus & 4) == 4)
                 {
                     // 西南内拐角
                     rotation.eulerAngles = new Vector3(0, 270 + rotationOffset, 0);
+                    GetNiceNeighbor(x + dx[5], y + dy[5], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                     Instantiate(cornerIVoxel, position, rotation, parent);
+                    onhill = true;
                 }
                 if ((neighborStatus & 1) == 0 && (neighborStatus & 8) == 0 &&
                     (neighborStatus & 2) == 2 && (neighborStatus & 4) == 4)
                 {
                     // 东南内拐角
                     rotation.eulerAngles = new Vector3(0, 0 + rotationOffset, 0);
+                    GetNiceNeighbor(x + dx[6], y + dy[6], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                     Instantiate(cornerIVoxel, position, rotation, parent);
+                    onhill = true;
                 }
                 if ((neighborStatus & 1) == 1 && (neighborStatus & 8) == 0 &&
                     (neighborStatus & 2) == 2 && (neighborStatus & 4) == 0)
                 {
                     // 东北内拐角
                     rotation.eulerAngles = new Vector3(0, 90 + rotationOffset, 0);
+                    GetNiceNeighbor(x + dx[4], y + dy[4], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                     Instantiate(cornerIVoxel, position, rotation, parent);
+                    onhill = true;
                 }
                 if (((neighborStatus & 1) == 0 || (neighborStatus & 8) == 0 ||
                     (neighborStatus & 2) == 0 || (neighborStatus & 4) == 0) &&
@@ -737,25 +866,33 @@ public class MapGenerator : MonoBehaviour
                     {
                         // 东北外墙角
                         rotation.eulerAngles = new Vector3(0, 180 + rotationOffset, 0);
+                        GetNiceNeighbor(x + dx[7], y + dy[7], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                         Instantiate(cornerOVoxel, position, rotation, parent);
+                        onhill = true;
                     }
                     if ((neighborStatus & 32) == 32 && (neighborStatus & 4) == 0 && (neighborStatus & 8) == 0)
                     {
                         // 东南外墙角
                         rotation.eulerAngles = new Vector3(0, 270 + rotationOffset, 0);
+                        GetNiceNeighbor(x + dx[5], y + dy[5], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                         Instantiate(cornerOVoxel, position, rotation, parent);
+                        onhill = true;
                     }
                     if ((neighborStatus & 64) == 64 && (neighborStatus & 2) == 0 && (neighborStatus & 4) == 0)
                     {
                         // 西南外墙角
                         rotation.eulerAngles = new Vector3(0, 0 + rotationOffset, 0);
+                        GetNiceNeighbor(x + dx[6], y + dy[6], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                         Instantiate(cornerOVoxel, position, rotation, parent);
+                        onhill = true;
                     }
                     if ((neighborStatus & 16) == 16 && (neighborStatus & 1) == 0 && (neighborStatus & 2) == 0)
                     {
                         // 西北外墙角
                         rotation.eulerAngles = new Vector3(0, 90 + rotationOffset, 0);
+                        GetNiceNeighbor(x + dx[4], y + dy[4], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                         Instantiate(cornerOVoxel, position, rotation, parent);
+                        onhill = true;
                     }
                     
                 }
@@ -770,25 +907,33 @@ public class MapGenerator : MonoBehaviour
                     {
                         // 南面坡
                         rotation.eulerAngles = new Vector3(0, 0 + rotationOffset, 0);
+                        GetNiceNeighbor(x + dx[2], y + dy[2], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                         Instantiate(hillVoxel, position, rotation, parent);
+                        onhill = true;
                     }
                     if ((neighborStatus & 2) > 0)
                     {
                         // 西面坡
                         rotation.eulerAngles = new Vector3(0, 90 + rotationOffset, 0);
+                        GetNiceNeighbor(x + dx[1], y + dy[1], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                         Instantiate(hillVoxel, position, rotation, parent);
+                        onhill = true;
                     }
                     if ((neighborStatus & 1) > 0)
                     {
                         // 北面坡
                         rotation.eulerAngles = new Vector3(0, 180 + rotationOffset, 0);
+                        GetNiceNeighbor(x + dx[0], y + dy[0], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                         Instantiate(hillVoxel, position, rotation, parent);
+                        onhill = true;
                     }
                     if ((neighborStatus & 8) > 0)
                     {
                         // 东面坡
                         rotation.eulerAngles = new Vector3(0, 270 + rotationOffset, 0);
+                        GetNiceNeighbor(x + dx[3], y + dy[3], out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                         Instantiate(hillVoxel, position, rotation, parent);
+                        onhill = true;
                     }
                 }
 
@@ -805,10 +950,12 @@ public class MapGenerator : MonoBehaviour
                     Instantiate(faceVoxel, position, rotation, parent);
                 }
 
-                if (x + 1 < row && surface[x + 1, y].height > surface[x, y].height + 1)
+                int cliff_start = x + 1 < row && surface[x + 1, y].type == SurfaceTypes.WATER ? 0 : 1;
+                if (x + 1 < row && surface[x + 1, y].height > surface[x, y].height + cliff_start)
                 {
+                    GetNiceNeighbor(x + 1, y, out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                     // 悬崖南面
-                    for (int i = 1; i < surface[x + 1, y].height - surface[x, y].height - 1; i++)
+                    for (int i = cliff_start; i < surface[x + 1, y].height - surface[x, y].height - 1; i++)
                     {
                         rotation.eulerAngles = new Vector3(0, 0 + rotationOffset, 0);
                         Instantiate(cliffVoxel, position + new Vector3(0, i, 0), rotation, parent);
@@ -818,10 +965,12 @@ public class MapGenerator : MonoBehaviour
                         new Vector3(0, surface[x + 1, y].height - surface[x, y].height - 1, 0), rotation, parent);
                 }
 
-                if (x - 1 >= 0 && surface[x - 1, y].height > surface[x, y].height + 1)
+                cliff_start = x - 1 >= 0 && surface[x - 1, y].type == SurfaceTypes.WATER ? 0 : 1;
+                if (x - 1 >= 0 && surface[x - 1, y].height > surface[x, y].height + cliff_start)
                 {
+                    GetNiceNeighbor(x - 1, y, out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                     // 悬崖北面
-                    for (int i = 1; i < surface[x - 1, y].height - surface[x, y].height - 1; i++)
+                    for (int i = cliff_start; i < surface[x - 1, y].height - surface[x, y].height - 1; i++)
                     {
                         rotation.eulerAngles = new Vector3(0, 180 + rotationOffset, 0);
                         Instantiate(cliffVoxel, position + new Vector3(0, i, 0), rotation, parent);
@@ -831,10 +980,12 @@ public class MapGenerator : MonoBehaviour
                         new Vector3(0, surface[x - 1, y].height - surface[x, y].height - 1, 0), rotation, parent);
                 }
 
-                if (y + 1 < col && surface[x, y + 1].height > surface[x, y].height + 1)
+                cliff_start = y + 1 < col && surface[x, y + 1].type == SurfaceTypes.WATER ? 0 : 1;
+                if (y + 1 < col && surface[x, y + 1].height > surface[x, y].height + cliff_start)
                 {
+                    GetNiceNeighbor(x, y + 1, out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                     // 悬崖东面
-                    for (int i = 1; i < surface[x, y + 1].height - surface[x, y].height - 1; i++)
+                    for (int i = cliff_start; i < surface[x, y + 1].height - surface[x, y].height - 1; i++)
                     {
                         rotation.eulerAngles = new Vector3(0, 270 + rotationOffset, 0);
                         Instantiate(cliffVoxel, position + new Vector3(0, i, 0), rotation, parent);
@@ -844,10 +995,12 @@ public class MapGenerator : MonoBehaviour
                         new Vector3(0, surface[x, y + 1].height - surface[x, y].height - 1, 0), rotation, parent);
                 }
 
-                if (y - 1 >= 0 && surface[x, y - 1].height > surface[x, y].height + 1)
+                cliff_start = y - 1 >= 0 && surface[x, y - 1].type == SurfaceTypes.WATER ? 0 : 1;
+                if (y - 1 >= 0 && surface[x, y - 1].height > surface[x, y].height + cliff_start)
                 {
+                    GetNiceNeighbor(x, y - 1, out cliffVoxel, out hillVoxel, out cornerIVoxel, out cornerOVoxel, out cliffTop);
                     // 悬崖西面
-                    for (int i = 1; i < surface[x, y - 1].height - surface[x, y].height - 1; i++)
+                    for (int i = cliff_start; i < surface[x, y - 1].height - surface[x, y].height - 1; i++)
                     {
                         rotation.eulerAngles = new Vector3(0, 90 + rotationOffset, 0);
                         Instantiate(cliffVoxel, position + new Vector3(0, i, 0), rotation, parent);
@@ -859,12 +1012,18 @@ public class MapGenerator : MonoBehaviour
 
                 if (surface[x, y].mapObjectData != null)
                 {
-                    RenderMapObject(surface[x, y].mapObjectData, position, gameObject.transform);
+                    RenderMapObject(surface[x, y].mapObjectData, position, gameObject.transform, onhill);
                 }
             }
         }
 
         
-        
+        for (int i = 0; i < areaLeader.GetLength(0); i++)
+        {
+            for (int j = 0; j < areaLeader.GetLength(1); j++)
+            {
+                areaLeader[i, j].merge();
+            }
+        }
     }
 }

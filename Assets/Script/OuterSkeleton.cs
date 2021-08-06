@@ -522,8 +522,8 @@ namespace RoomGenerator
 
         bool ChokePoint(int x, int y)
         {
-            if (x > 0 && belong[x - 1, y] < 0) return false;
-            if (y > 0 && belong[x, y - 1] < 0) return false;
+            if (x == 0 || belong[x - 1, y] < 0) return false;
+            if (y == 0 || belong[x, y - 1] < 0) return false;
             if (walk[x, y] > 0)
             {
                 if (x > 0 && walk[x - 1, y] == 0) return true;
@@ -670,7 +670,8 @@ namespace RoomGenerator
 
         public MapObjectData ConvertInit(int he)
         {
-            /*for (int i = 0; i < maxx - minx + 1; i++)
+            MapObjectData obj = new MapObjectData();
+            for (int i = 0; i < maxx - minx + 1; i++)
             {
                 for (int j = 0; j < maxy - miny + 1; j++)
                 {
@@ -679,11 +680,23 @@ namespace RoomGenerator
                         int num = 0;
                         if (i == 0 || belong[i - 1, j] == -1) num++;
                         if (j == 0 || belong[i, j - 1] == -1) num++;
-                        if (num == 2) a[i, j] = 4;
+                        if (num == 2)
+                        {
+                            a[i, j] = 1024;
+                            obj.staircase = new int[2] { minx + i - 1, miny + j };
+                        }
                     }
                 }
-            }*/
-            MapObjectData obj = new MapObjectData();
+            }
+
+
+            foreach (Point p in poly)
+            {
+                if (p.type == LineType.window)
+                {
+                    a[p.x - minx, p.y - miny] <<= 4;
+                }
+            }
             obj.voxel_direction = new int[maxx - minx + 1, maxy - miny + 1, he];
             obj.voxel_types = new VoxelType[maxx - minx + 1, maxy - miny + 1, he];
 
@@ -694,13 +707,6 @@ namespace RoomGenerator
 
         public MapObjectData Convert(int he, MapObjectData obj)
         {
-            foreach (Point p in poly)
-            {
-                if (p.type == LineType.window)
-                {
-                    a[p.x - minx, p.y - miny] <<= 4;
-                }
-            }
             for (int i = 0; i < maxx - minx + 1; i++)
             {
                 for (int j = 0; j < maxy - miny + 1; j++)
